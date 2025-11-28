@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N2 核心词汇 (英日双语版)</title>
+    <style>
+        :root {
+            --primary: #8A2BE2; /* 蓝紫色 */
+            --secondary: #FF00FF; /* 霓虹粉 */
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+        }
+
+        body {
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部导航 */
+        header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            width: 100%;
+            padding: 15px 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .header-row { display: flex; align-items: center; gap: 15px; }
+
+        h1 { margin: 0; color: var(--primary); font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; }
+
+        .nav-btn {
+            padding: 6px 16px;
+            border: 1px solid #dfe6e9;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: white;
+            transition: 0.2s;
+            color: var(--text-sub);
+        }
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(138, 43, 226, 0.3);
+        }
+
+        .search-box {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #dfe6e9;
+            outline: none;
+            width: 200px;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .search-box:focus { border-color: var(--secondary); width: 260px; }
+
+        /* 快速跳转 */
+        .jump-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px;
+            padding: 5px 10px;
+            max-width: 800px;
+        }
+        .jump-nav a {
+            text-decoration: none;
+            color: var(--text-sub);
+            background: rgba(255,255,255,0.6);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .jump-nav a:hover { background: var(--primary); color: white; }
+
+        /* 容器 */
+        .container { width: 100%; max-width: 1100px; padding: 20px; box-sizing: border-box; }
+
+        /* 分组标题 */
+        .row-header {
+            font-size: 1.8rem;
+            color: #b2bec3;
+            font-weight: 900;
+            margin: 40px 0 15px;
+            text-align: left;
+            border-bottom: 2px solid #dfe6e9;
+            line-height: 1;
+        }
+        .row-header span { color: var(--primary); font-size: 1rem; margin-left: 10px; vertical-align: middle; }
+
+        /* 网格 */
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        /* 动漫风卡片 */
+        .anime-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .anime-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        /* 上半部分：视觉区域 (Icon OR English Word) */
+        .card-visual {
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: #f8f9fa;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        /* 动态背景 */
+        .card-visual::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 60%);
+            opacity: 0.5;
+        }
+
+        /* 图标模式 */
+        .card-icon {
+            font-size: 3.5rem;
+            z-index: 2;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            transition: transform 0.3s;
+        }
+        
+        /* 英语单词视觉模式 (Fallback) */
+        .card-text-visual {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--primary);
+            z-index: 2;
+            text-align: center;
+            padding: 0 10px;
+            font-family: "Arial Black", sans-serif;
+            opacity: 0.8;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            text-transform: uppercase; /* 英文大写更像Logo */
+        }
+
+        .anime-card:hover .card-icon { transform: scale(1.2) rotate(8deg); }
+        .anime-card:hover .card-text-visual { transform: scale(1.1); color: var(--secondary); }
+
+        /* 卡片下半部分：信息区域 */
+        .card-info {
+            padding: 12px 15px;
+            text-align: left;
+            background: white;
+        }
+
+        .info-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+
+        .kanji {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .kana {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .meanings-box { margin-top: 8px; }
+        
+        .meaning-cn {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .meaning-en {
+            font-size: 0.8rem;
+            color: #a4b0be;
+            font-family: "Segoe UI", sans-serif;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .audio-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #d1d8e0;
+            z-index: 5;
+        }
+        .anime-card:hover .audio-icon { color: var(--primary); }
+
+        /* 测验模式 */
+        .quiz-wrapper { display: flex; justify-content: center; padding-top: 40px; }
+        .quiz-card {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            text-align: center;
+            position: relative;
+        }
+        .q-word { font-size: 3.5rem; margin: 10px 0; color: var(--text-main); font-weight: 900; }
+        .q-kana { font-size: 1.2rem; color: #b2bec3; margin-bottom: 30px; }
+        
+        .option-btn {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 2px solid #f1f2f6;
+            background: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .option-btn:hover { border-color: var(--primary); background: #f8f9fa; }
+        .option-btn.correct { background: #2ecc71; border-color: #2ecc71; color: white; }
+        .option-btn.wrong { background: #ff7675; border-color: #ff7675; color: white; }
+        
+        .opt-en { font-size: 0.8rem; color: #b2bec3; font-weight: normal; }
+        .option-btn.correct .opt-en, .option-btn.wrong .opt-en { color: rgba(255,255,255,0.8); }
+
+        /* 回到顶部 */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 999;
+            transition: 0.3s;
+        }
+        .fab:hover { transform: scale(1.1); background: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-row">
+        <h1>N2 Vocab <span style="font-size:0.8em; color:#ccc;">x English</span></h1>
+        <div class="nav-group">
+            <button id="btn-list" class="nav-btn active" onclick="switchTab('list')">列表</button>
+            <button id="btn-quiz" class="nav-btn" onclick="switchTab('quiz')">测验</button>
+        </div>
+    </div>
+    <input type="text" class="search-box" placeholder="Search / 搜索..." oninput="handleSearch(this.value)">
+    <div class="jump-nav" id="jump-nav"></div>
+</header>
+
+<div class="container" id="app"></div>
+
+<div class="fab" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆</div>
+
+<script>
+    // -----------------------------------------------------------------
+    // 500 核心词汇 (已添加 English 字段)
+    // -----------------------------------------------------------------
+    const vocabulary = [
+        // あ行
+        { kanji: "愛する", kana: "あいする", meaning: "爱", english: "Love" },
+        { kanji: "曖昧", kana: "あいまい", meaning: "暧昧、含糊", english: "Ambiguous" },
+        { kanji: "味わう", kana: "あじわう", meaning: "品尝、体验", english: "Taste/Savor" },
+        { kanji: "預かる", kana: "あずかる", meaning: "保管、照看", english: "Keep/Look after" },
+        { kanji: "預ける", kana: "あずける", meaning: "寄存、托付", english: "Deposit" },
+        { kanji: "与える", kana: "あたえる", meaning: "给予", english: "Give" },
+        { kanji: "暖まる", kana: "あたたまる", meaning: "变暖和", english: "Warm up" },
+        { kanji: "扱う", kana: "あつかう", meaning: "操作、对待", english: "Handle" },
+        { kanji: "暴れる", kana: "あばれる", meaning: "胡闹、暴乱", english: "Rampage" },
+        { kanji: "浴びる", kana: "あびる", meaning: "淋、浴", english: "Bathe" },
+        { kanji: "溢れる", kana: "あふれる", meaning: "溢出、充满", english: "Overflow" },
+        { kanji: "甘やかす", kana: "あまやかす", meaning: "娇惯", english: "Spoil" },
+        { kanji: "余る", kana: "あまる", meaning: "剩余", english: "Remain" },
+        { kanji: "編む", kana: "あむ", meaning: "编织", english: "Knit" },
+        { kanji: "争う", kana: "あらそう", meaning: "争夺、争论", english: "Dispute" },
+        { kanji: "改める", kana: "あらためる", meaning: "改变、修改", english: "Change/Reform" },
+        { kanji: "表す", kana: "あらわす", meaning: "表现、表达", english: "Express" },
+        { kanji: "現れる", kana: "あらわれる", meaning: "出现", english: "Appear" },
+        { kanji: "合わせる", kana: "あわせる", meaning: "合并、配合", english: "Combine" },
+        { kanji: "慌てる", kana: "あわてる", meaning: "惊慌", english: "Panic" },
+        { kanji: "哀れ", kana: "あわれ", meaning: "悲哀、可怜", english: "Pity" },
+        { kanji: "明らか", kana: "あきらか", meaning: "明显", english: "Obvious" },
+        { kanji: "怪しい", kana: "あやしい", meaning: "可疑", english: "Suspicious" },
+        { kanji: "荒い", kana: "あらい", meaning: "粗暴", english: "Rough" },
+        { kanji: "新た", kana: "あらた", meaning: "新的", english: "New" },
+        { kanji: "あらゆる", kana: "あらゆる", meaning: "所有的", english: "Every" },
+        
+        // い行
+        { kanji: "意外", kana: "いがい", meaning: "意外", english: "Unexpected" },
+        { kanji: "意識", kana: "いしき", meaning: "意识", english: "Consciousness" },
+        { kanji: "維持", kana: "いじ", meaning: "维持", english: "Maintenance" },
+        { kanji: "偉大", kana: "いだい", meaning: "伟大", english: "Great" },
+        { kanji: "市場", kana: "いちば", meaning: "市场", english: "Market" },
+        { kanji: "一層", kana: "いっそう", meaning: "更加", english: "Much more" },
+        { kanji: "一体", kana: "いったい", meaning: "到底、一体", english: "On earth/One body" },
+        { kanji: "衣服", kana: "いふく", meaning: "衣服", english: "Clothes" },
+        { kanji: "違反", kana: "いはん", meaning: "违反", english: "Violation" },
+        { kanji: "依頼", kana: "いらい", meaning: "委托", english: "Request" },
+        { kanji: "医療", kana: "いりょう", meaning: "医疗", english: "Medical care" },
+        { kanji: "いわゆる", kana: "いわゆる", meaning: "所谓的", english: "So-called" },
+        { kanji: "印", kana: "しるし", meaning: "记号", english: "Mark" },
+        { kanji: "印象", kana: "いんしょう", meaning: "印象", english: "Impression" },
+        { kanji: "引退", kana: "いんたい", meaning: "引退", english: "Retirement" },
+        { kanji: "引用", kana: "いんよう", meaning: "引用", english: "Citation" },
+        { kanji: "言い出す", kana: "いいだす", meaning: "说出口", english: "Start speaking" },
+        { kanji: "至る", kana: "いたる", meaning: "到达", english: "Arrive" },
+        { kanji: "抱く", kana: "いだく", meaning: "怀抱", english: "Embrace" },
+        { kanji: "威張る", kana: "いばる", meaning: "傲慢", english: "Boast" },
+        { kanji: "嫌がる", kana: "いやがる", meaning: "讨厌", english: "Dislike" },
+        
+        // う行
+        { kanji: "伺う", kana: "うかがう", meaning: "拜访", english: "Visit (humble)" },
+        { kanji: "浮かぶ", kana: "うかぶ", meaning: "漂浮", english: "Float" },
+        { kanji: "受け取る", kana: "うけとる", meaning: "接收", english: "Receive" },
+        { kanji: "動かす", kana: "うごかす", meaning: "移动", english: "Move" },
+        { kanji: "失う", kana: "うしなう", meaning: "丢失", english: "Lose" },
+        { kanji: "薄める", kana: "うすめる", meaning: "弄淡", english: "Dilute" },
+        { kanji: "疑う", kana: "うたがう", meaning: "怀疑", english: "Doubt" },
+        { kanji: "撃つ", kana: "うつ", meaning: "射击", english: "Shoot" },
+        { kanji: "移す", kana: "うつす", meaning: "移动", english: "Transfer" },
+        { kanji: "訴える", kana: "うったえる", meaning: "诉讼", english: "Sue/Appeal" },
+        { kanji: "奪う", kana: "うばう", meaning: "夺取", english: "Snatch" },
+        { kanji: "埋める", kana: "うめる", meaning: "埋", english: "Bury" },
+        { kanji: "敬う", kana: "うやまう", meaning: "尊敬", english: "Respect" },
+        { kanji: "裏返す", kana: "うらがえす", meaning: "翻转", english: "Turn over" },
+        { kanji: "裏切る", kana: "うらぎる", meaning: "背叛", english: "Betray" },
+        { kanji: "占う", kana: "うらなう", meaning: "占卜", english: "Fortune-tell" },
+        { kanji: "恨む", kana: "うらむ", meaning: "怨恨", english: "Resent" },
+        { kanji: "宇宙", kana: "うちゅう", meaning: "宇宙", english: "Universe" },
+        { kanji: "運賃", kana: "うんちん", meaning: "运费", english: "Fare" },
+        { kanji: "薄暗い", kana: "うすぐらい", meaning: "微暗", english: "Dim" },
+        { kanji: "うまい", kana: "うまい", meaning: "美味", english: "Delicious/Skillful" },
+        { kanji: "羨ましい", kana: "うらやましい", meaning: "羡慕", english: "Envious" },
+        { kanji: "うるさい", kana: "うるさい", meaning: "吵闹", english: "Noisy" },
+        { kanji: "嬉しい", kana: "うれしい", meaning: "高兴", english: "Happy" },
+
+        // え行
+        { kanji: "永遠", kana: "えいえん", meaning: "永远", english: "Eternity" },
+        { kanji: "影響", kana: "えいきょう", meaning: "影响", english: "Influence" },
+        { kanji: "栄養", kana: "えいよう", meaning: "营养", english: "Nutrition" },
+        { kanji: "衛星", kana: "えいせい", meaning: "卫星", english: "Satellite" },
+        { kanji: "描く", kana: "えがく", meaning: "描绘", english: "Draw/Depict" },
+        { kanji: "援助", kana: "えんじょ", meaning: "援助", english: "Assistance" },
+        { kanji: "演説", kana: "えんぜつ", meaning: "演说", english: "Speech" },
+        { kanji: "演奏", kana: "えんそう", meaning: "演奏", english: "Performance" },
+        { kanji: "偉い", kana: "えらい", meaning: "伟大", english: "Great" },
+        
+        // お行
+        { kanji: "追いかける", kana: "おいかける", meaning: "追赶", english: "Chase" },
+        { kanji: "追いつく", kana: "おいつく", meaning: "追上", english: "Catch up" },
+        { kanji: "応援", kana: "おうえん", meaning: "支援、加油", english: "Support" },
+        { kanji: "応じる", kana: "おうじる", meaning: "响应", english: "Respond" },
+        { kanji: "応対", kana: "おうたい", meaning: "接待", english: "Reception" },
+        { kanji: "覆う", kana: "おおう", meaning: "覆盖", english: "Cover" },
+        { kanji: "汚染", kana: "おせん", meaning: "污染", english: "Pollution" },
+        { kanji: "補う", kana: "おぎなう", meaning: "补充", english: "Supplement" },
+        { kanji: "贈る", kana: "おくる", meaning: "赠送", english: "Gift" },
+        { kanji: "怠る", kana: "おこたる", meaning: "怠慢", english: "Neglect" },
+        { kanji: "抑える", kana: "おさえる", meaning: "压制", english: "Suppress" },
+        { kanji: "収める", kana: "おさめる", meaning: "收纳", english: "Store" },
+        { kanji: "恐れる", kana: "おそれる", meaning: "恐惧", english: "Fear" },
+        { kanji: "教わる", kana: "おそわる", meaning: "受教", english: "Be taught" },
+        { kanji: "落ちつく", kana: "おちつく", meaning: "沉着", english: "Calm down" },
+        { kanji: "溺れる", kana: "おぼれる", meaning: "溺水", english: "Drown" },
+        { kanji: "思い出す", kana: "おもいだす", meaning: "想起", english: "Recall" },
+        { kanji: "及ぼす", kana: "およぼす", meaning: "波及", english: "Exert/Affect" },
+        { kanji: "下ろす", kana: "おろす", meaning: "取下", english: "Lower" },
+        { kanji: "幼い", kana: "おさない", meaning: "幼小", english: "Infant/Young" },
+        { kanji: "惜しい", kana: "おしい", meaning: "可惜", english: "Regrettable" },
+        { kanji: "恐ろしい", kana: "おそろしい", meaning: "可怕", english: "Terrifying" },
+        { kanji: "穏やか", kana: "おだやか", meaning: "平稳", english: "Gentle" },
+        { kanji: "およそ", kana: "およそ", meaning: "大概", english: "Approximately" },
+
+        // か行
+        { kanji: "改札", kana: "かいさつ", meaning: "检票", english: "Ticket gate" },
+        { kanji: "解散", kana: "かいさん", meaning: "解散", english: "Dissolution" },
+        { kanji: "解釈", kana: "かいしゃく", meaning: "解释", english: "Interpretation" },
+        { kanji: "回収", kana: "かいしゅう", meaning: "回收", english: "Collection" },
+        { kanji: "回復", kana: "かいふく", meaning: "恢复", english: "Recovery" },
+        { kanji: "快晴", kana: "かいせい", meaning: "晴朗", english: "Fine weather" },
+        { kanji: "会計", kana: "かいけい", meaning: "会计", english: "Account" },
+        { kanji: "解決", kana: "かいけつ", meaning: "解决", english: "Solution" },
+        { kanji: "会合", kana: "かいごう", meaning: "聚会", english: "Meeting" },
+        { kanji: "外交", kana: "がいこう", meaning: "外交", english: "Diplomacy" },
+        { kanji: "外出", kana: "がいしゅつ", meaning: "外出", english: "Going out" },
+        { kanji: "改善", kana: "かいぜん", meaning: "改善", english: "Improvement" },
+        { kanji: "快適", kana: "かいてき", meaning: "舒适", english: "Comfortable" },
+        { kanji: "抱える", kana: "かかえる", meaning: "承担", english: "Hold/Bear" },
+        { kanji: "限る", kana: "かぎる", meaning: "限于", english: "Limit" },
+        { kanji: "欠ける", kana: "かける", meaning: "缺乏", english: "Lack" },
+        { kanji: "囲む", kana: "かこむ", meaning: "包围", english: "Surround" },
+        { kanji: "重なる", kana: "かさなる", meaning: "重叠", english: "Overlap" },
+        { kanji: "重ねる", kana: "かさねる", meaning: "堆叠", english: "Pile up" },
+        { kanji: "飾る", kana: "かざる", meaning: "装饰", english: "Decorate" },
+        { kanji: "稼ぐ", kana: "かせぐ", meaning: "赚钱", english: "Earn" },
+        { kanji: "語る", kana: "かたる", meaning: "讲述", english: "Narrate" },
+        { kanji: "叶う", kana: "かなう", meaning: "实现", english: "Come true" },
+        { kanji: "兼ねる", kana: "かねる", meaning: "兼备", english: "Serve as" },
+        { kanji: "通う", kana: "かよう", meaning: "往来", english: "Commute" },
+        { kanji: "枯れる", kana: "かれる", meaning: "枯萎", english: "Wither" },
+        { kanji: "可愛がる", kana: "かわいがる", meaning: "疼爱", english: "Cherish" },
+        { kanji: "乾く", kana: "かわく", meaning: "干", english: "Dry" },
+        { kanji: "代わる", kana: "かわる", meaning: "代替", english: "Replace" },
+        { kanji: "看病", kana: "かんびょう", meaning: "看护", english: "Nursing" },
+        { kanji: "完了", kana: "かんりょう", meaning: "完成", english: "Completion" },
+        { kanji: "関連", kana: "かんれん", meaning: "关联", english: "Relation" },
+        { kanji: "管理", kana: "かんり", meaning: "管理", english: "Management" },
+        { kanji: "感激", kana: "かんげき", meaning: "感激", english: "Deep emotion" },
+        { kanji: "感情", kana: "かんじょう", meaning: "感情", english: "Emotion" },
+        { kanji: "感心", kana: "かんしん", meaning: "佩服", english: "Admiration" },
+        { kanji: "関心", kana: "かんしん", meaning: "关心", english: "Interest" },
+        { kanji: "感覚", kana: "かんかく", meaning: "感觉", english: "Sensation" },
+        { kanji: "間接", kana: "かんせつ", meaning: "间接", english: "Indirect" },
+        { kanji: "観測", kana: "かんそく", meaning: "观测", english: "Observation" },
+        { kanji: "勘定", kana: "かんじょう", meaning: "结账", english: "Bill/Calculation" },
+        { kanji: "完全", kana: "かんぜん", meaning: "完全", english: "Perfect" },
+        { kanji: "簡単", kana: "かんたん", meaning: "简单", english: "Simple" },
+        { kanji: "頑丈", kana: "がんじょう", meaning: "结实", english: "Sturdy" },
+        { kanji: "賢い", kana: "かしこい", meaning: "聪明", english: "Wise" },
+        { kanji: "勝手", kana: "かって", meaning: "任性", english: "Selfish" },
+        { kanji: "活発", kana: "かっぱつ", meaning: "活泼", english: "Active" },
+        { kanji: "可能", kana: "かのう", meaning: "可能", english: "Possible" },
+        { kanji: "痒い", kana: "かゆい", meaning: "痒", english: "Itchy" },
+        { kanji: "空", kana: "から", meaning: "空", english: "Empty" },
+        
+        // き行
+        { kanji: "効く", kana: "きく", meaning: "有效", english: "Effective" },
+        { kanji: "刻む", kana: "きざむ", meaning: "雕刻", english: "Carve/Chop" },
+        { kanji: "気に入る", kana: "きにいる", meaning: "中意", english: "Like" },
+        { kanji: "嫌う", kana: "きらう", meaning: "厌恶", english: "Hate" },
+        { kanji: "切れる", kana: "きれる", meaning: "断绝", english: "Cut/Run out" },
+        { kanji: "金額", kana: "きんがく", meaning: "金额", english: "Amount" },
+        { kanji: "金属", kana: "きんぞく", meaning: "金属", english: "Metal" },
+        { kanji: "筋肉", kana: "きんにく", meaning: "肌肉", english: "Muscle" },
+        { kanji: "貴重", kana: "きちょう", meaning: "贵重", english: "Precious" },
+        { kanji: "奇妙", kana: "きみょう", meaning: "奇妙", english: "Strange" },
+        { kanji: "急激", kana: "きゅうげき", meaning: "急剧", english: "Rapid" },
+        { kanji: "急速", kana: "きゅうそく", meaning: "急速", english: "Rapid" },
+        { kanji: "窮屈", kana: "きゅうくつ", meaning: "窄小", english: "Tight" },
+        { kanji: "器用", kana: "きよう", meaning: "灵巧", english: "Dexterous" },
+        { kanji: "強力", kana: "きょうりょく", meaning: "强力", english: "Powerful" },
+        { kanji: "巨大", kana: "きょだい", meaning: "巨大", english: "Huge" },
+        { kanji: "清い", kana: "きよい", meaning: "清澈", english: "Pure" },
+        { kanji: "気軽", kana: "きがる", meaning: "轻松", english: "Lighthearted" },
+        { kanji: "共通", kana: "きょうつう", meaning: "共通", english: "Common" },
+
+        // く行
+        { kanji: "腐る", kana: "くさる", meaning: "腐烂", english: "Rot" },
+        { kanji: "崩れる", kana: "くずれる", meaning: "崩溃", english: "Collapse" },
+        { kanji: "砕く", kana: "くだく", meaning: "打碎", english: "Smash" },
+        { kanji: "くたびれる", kana: "くたびれる", meaning: "疲劳", english: "Tired" },
+        { kanji: "狂う", kana: "くるう", meaning: "发狂", english: "Go mad" },
+        { kanji: "苦しむ", kana: "くるしむ", meaning: "痛苦", english: "Suffer" },
+        { kanji: "暮れる", kana: "くれる", meaning: "天黑", english: "Get dark" },
+        { kanji: "加える", kana: "くわえる", meaning: "加上", english: "Add" },
+        { kanji: "偶然", kana: "ぐうぜん", meaning: "偶然", english: "Coincidence" },
+        { kanji: "苦情", kana: "くじょう", meaning: "投诉", english: "Complaint" },
+        { kanji: "苦痛", kana: "くつう", meaning: "痛苦", english: "Pain" },
+        { kanji: "区別", kana: "くべつ", meaning: "区别", english: "Distinction" },
+        { kanji: "訓練", kana: "くんれん", meaning: "训练", english: "Training" },
+        { kanji: "くだらない", kana: "くだらない", meaning: "无聊", english: "Worthless" },
+        { kanji: "悔しい", kana: "くやしい", meaning: "懊悔", english: "Regretful" },
+        { kanji: "詳しい", kana: "くわしい", meaning: "详细", english: "Detailed" },
+
+        // け行
+        { kanji: "削る", kana: "けずる", meaning: "削减", english: "Shave/Reduce" },
+        { kanji: "敬意", kana: "けいい", meaning: "敬意", english: "Respect" },
+        { kanji: "景気", kana: "けいき", meaning: "景气", english: "Economy" },
+        { kanji: "傾向", kana: "けいこう", meaning: "倾向", english: "Trend" },
+        { kanji: "警告", kana: "けいこく", meaning: "警告", english: "Warning" },
+        { kanji: "計算", kana: "けいさん", meaning: "计算", english: "Calculation" },
+        { kanji: "掲示", kana: "けいじ", meaning: "布告", english: "Notice" },
+        { kanji: "刑事", kana: "けいじ", meaning: "刑警", english: "Detective" },
+        { kanji: "継続", kana: "けいぞく", meaning: "继续", english: "Continuation" },
+        { kanji: "契約", kana: "けいやく", meaning: "契约", english: "Contract" },
+        { kanji: "経由", kana: "けいゆ", meaning: "经由", english: "Via" },
+        { kanji: "結果", kana: "けっか", meaning: "结果", english: "Result" },
+        { kanji: "欠陥", kana: "けっかん", meaning: "缺陷", english: "Defect" },
+        { kanji: "欠席", kana: "けっせき", meaning: "缺席", english: "Absence" },
+        { kanji: "決定", kana: "けってい", meaning: "决定", english: "Decision" },
+        { kanji: "決心", kana: "けっしん", meaning: "决心", english: "Resolution" },
+        { kanji: "結論", kana: "けつろん", meaning: "结论", english: "Conclusion" },
+        { kanji: "限界", kana: "げんかい", meaning: "极限", english: "Limit" },
+        { kanji: "現金", kana: "げんきん", meaning: "现金", english: "Cash" },
+        { kanji: "言語", kana: "げんご", meaning: "语言", english: "Language" },
+        { kanji: "原産", kana: "げんさん", meaning: "原产", english: "Origin" },
+        { kanji: "現在", kana: "げんざい", meaning: "现在", english: "Present" },
+        { kanji: "現実", kana: "げんじつ", meaning: "现实", english: "Reality" },
+        { kanji: "現象", kana: "げんしょう", meaning: "现象", english: "Phenomenon" },
+        { kanji: "現状", kana: "げんじょう", meaning: "现状", english: "Status quo" },
+        { kanji: "建設", kana: "けんせつ", meaning: "建设", english: "Construction" },
+        { kanji: "現代", kana: "げんだい", meaning: "现代", english: "Modern" },
+        { kanji: "建築", kana: "けんちく", meaning: "建筑", english: "Architecture" },
+        { kanji: "見当", kana: "けんとう", meaning: "估计", english: "Estimate" },
+        { kanji: "検討", kana: "けんとう", meaning: "讨论", english: "Consideration" },
+        { kanji: "現場", kana: "げんば", meaning: "现场", english: "Scene/Site" },
+        { kanji: "憲法", kana: "けんぽう", meaning: "宪法", english: "Constitution" },
+        { kanji: "権利", kana: "けんり", meaning: "权利", english: "Right" },
+        { kanji: "険しい", kana: "けわしい", meaning: "险峻", english: "Steep" },
+        { kanji: "結構", kana: "けっこう", meaning: "很好", english: "Fine/Splendid" },
+        { kanji: "下品", kana: "げひん", meaning: "粗俗", english: "Vulgar" },
+
+        // こ行
+        { kanji: "越える", kana: "こえる", meaning: "越过", english: "Cross" },
+        { kanji: "焦げる", kana: "こげる", meaning: "烧焦", english: "Burn" },
+        { kanji: "凍る", kana: "こおる", meaning: "结冰", english: "Freeze" },
+        { kanji: "試みる", kana: "こころみる", meaning: "尝试", english: "Attempt" },
+        { kanji: "断る", kana: "ことわる", meaning: "拒绝", english: "Refuse" },
+        { kanji: "好む", kana: "このむ", meaning: "喜好", english: "Prefer" },
+        { kanji: "困る", kana: "こまる", meaning: "为难", english: "Troubled" },
+        { kanji: "込む", kana: "こむ", meaning: "拥挤", english: "Crowded" },
+        { kanji: "転がる", kana: "ころがる", meaning: "滚动", english: "Roll" },
+        { kanji: "殺す", kana: "ころす", meaning: "杀", english: "Kill" },
+        { kanji: "効果", kana: "こうか", meaning: "效果", english: "Effect" },
+        { kanji: "高価", kana: "こうか", meaning: "高价", english: "Expensive" },
+        { kanji: "交換", kana: "こうかん", meaning: "交换", english: "Exchange" },
+        { kanji: "航空", kana: "こうくう", meaning: "航空", english: "Aviation" },
+        { kanji: "光景", kana: "こうけい", meaning: "光景", english: "Spectacle" },
+        { kanji: "貢献", kana: "こうけん", meaning: "贡献", english: "Contribution" },
+        { kanji: "交際", kana: "こうさい", meaning: "交际", english: "Association" },
+        { kanji: "交差点", kana: "こうさてん", meaning: "路口", english: "Intersection" },
+        { kanji: "講師", kana: "こうし", meaning: "讲师", english: "Lecturer" },
+        { kanji: "公式", kana: "こうしき", meaning: "公式", english: "Official/Formula" },
+        { kanji: "校舎", kana: "こうしゃ", meaning: "校舍", english: "School building" },
+        { kanji: "後者", kana: "こうしゃ", meaning: "后者", english: "The latter" },
+        { kanji: "公衆", kana: "こうしゅう", meaning: "公衆", english: "Public" },
+        { kanji: "向上", kana: "こうじょう", meaning: "向上", english: "Improvement" },
+        { kanji: "構成", kana: "こうせい", meaning: "构成", english: "Composition" },
+        { kanji: "高速", kana: "こうそく", meaning: "高速", english: "High speed" },
+        { kanji: "行動", kana: "こうどう", meaning: "行动", english: "Action" },
+        { kanji: "強盗", kana: "ごうとう", meaning: "强盗", english: "Robber" },
+        { kanji: "幸福", kana: "こうふく", meaning: "幸福", english: "Happiness" },
+        { kanji: "公平", kana: "こうへい", meaning: "公平", english: "Fairness" },
+        { kanji: "候補", kana: "こうほ", meaning: "候选", english: "Candidate" },
+        { kanji: "考慮", kana: "こうりょ", meaning: "考虑", english: "Consideration" },
+        { kanji: "誤解", kana: "ごかい", meaning: "误解", english: "Misunderstanding" },
+        { kanji: "語学", kana: "ごがく", meaning: "语学", english: "Language study" },
+        { kanji: "呼吸", kana: "こきゅう", meaning: "呼吸", english: "Breathing" },
+        { kanji: "故郷", kana: "こきょう", meaning: "故乡", english: "Hometown" },
+        { kanji: "克服", kana: "こくふく", meaning: "克服", english: "Overcome" },
+        { kanji: "国民", kana: "こくみん", meaning: "国民", english: "Citizen" },
+        { kanji: "穀物", kana: "こくもつ", meaning: "谷物", english: "Grain" },
+        { kanji: "故障", kana: "こしょう", meaning: "故障", english: "Breakdown" },
+        { kanji: "個人", kana: "こじん", meaning: "个人", english: "Individual" },
+        { kanji: "国家", kana: "こっか", meaning: "国家", english: "Nation" },
+        { kanji: "国会", kana: "こっかい", meaning: "国会", english: "Parliament" },
+        { kanji: "国境", kana: "こっきょう", meaning: "国境", english: "Border" },
+        { kanji: "骨折", kana: "こっせつ", meaning: "骨折", english: "Fracture" },
+        { kanji: "固定", kana: "こてい", meaning: "固定", english: "Fixed" },
+        { kanji: "混乱", kana: "こんらん", meaning: "混乱", english: "Confusion" },
+        { kanji: "困難", kana: "こんなん", meaning: "困难", english: "Difficulty" },
+        { kanji: "豪華", kana: "ごうか", meaning: "豪华", english: "Gorgeous" },
+        { kanji: "濃い", kana: "こい", meaning: "浓", english: "Thick/Dark" },
+        { kanji: "恋しい", kana: "こいしい", meaning: "怀念", english: "Yearned for" },
+        { kanji: "強引", kana: "ごういん", meaning: "强行", english: "Pushy/Forcible" },
+        { kanji: "高度", kana: "こうど", meaning: "高度", english: "High degree" },
+
+        // さ行
+        { kanji: "際", kana: "さい", meaning: "时候", english: "Occasion" },
+        { kanji: "作成", kana: "さくせい", meaning: "制作", english: "Creation" },
+        { kanji: "逆らう", kana: "さからう", meaning: "违背", english: "Oppose" },
+        { kanji: "叫ぶ", kana: "さけぶ", meaning: "呼叫", english: "Shout" },
+        { kanji: "避ける", kana: "さける", meaning: "避开", english: "Avoid" },
+        { kanji: "支える", kana: "ささえる", meaning: "支撑", english: "Support" },
+        { kanji: "指す", kana: "さす", meaning: "指", english: "Point" },
+        { kanji: "騒ぐ", kana: "さわぐ", meaning: "吵闹", english: "Make noise" },
+        { kanji: "触る", kana: "さわる", meaning: "触摸", english: "Touch" },
+        { kanji: "在学", kana: "ざいがく", meaning: "在校", english: "Enrolled" },
+        { kanji: "財産", kana: "ざいさん", meaning: "财产", english: "Property" },
+        { kanji: "採用", kana: "さいよう", meaning: "录用", english: "Adoption" },
+        { kanji: "作業", kana: "さぎょう", meaning: "作业", english: "Work" },
+        { kanji: "撮影", kana: "さつえい", meaning: "摄影", english: "Filming" },
+        { kanji: "雑音", kana: "ざつおん", meaning: "噪音", english: "Noise" },
+        { kanji: "砂漠", kana: "さばく", meaning: "沙漠", english: "Desert" },
+        { kanji: "参加", kana: "さんか", meaning: "参加", english: "Participation" },
+        { kanji: "産業", kana: "さんぎょう", meaning: "产业", english: "Industry" },
+        { kanji: "参考", kana: "さんこう", meaning: "参考", english: "Reference" },
+        { kanji: "賛成", kana: "さんせい", meaning: "赞成", english: "Approval" },
+        
+        // し行
+        { kanji: "事情", kana: "じじょう", meaning: "情形", english: "Circumstances" },
+        { kanji: "指示", kana: "しじ", meaning: "指示", english: "Instruction" },
+        { kanji: "自信", kana: "じしん", meaning: "自信", english: "Confidence" },
+        { kanji: "実験", kana: "じっけん", meaning: "实验", english: "Experiment" },
+        { kanji: "実現", kana: "じつげん", meaning: "实现", english: "Realization" },
+        { kanji: "実行", kana: "じっこう", meaning: "实行", english: "Execution" },
+        { kanji: "実際", kana: "じっさい", meaning: "实际", english: "Reality" },
+        { kanji: "実施", kana: "じっし", meaning: "实施", english: "Implementation" },
+        { kanji: "手段", kana: "しゅだん", meaning: "手段", english: "Means" },
+        { kanji: "縮小", kana: "しゅくしょう", meaning: "缩小", english: "Reduction" },
+        { kanji: "支給", kana: "しきゅう", meaning: "支付", english: "Payment" },
+        { kanji: "資源", kana: "しげん", meaning: "资源", english: "Resource" },
+        { kanji: "事件", kana: "じけん", meaning: "事件", english: "Incident" },
+        { kanji: "時刻", kana: "じこく", meaning: "时刻", english: "Time" },
+        { kanji: "自殺", kana: "じさつ", meaning: "自杀", english: "Suicide" },
+        { kanji: "事実", kana: "じじつ", meaning: "事实", english: "Fact" },
+        { kanji: "支出", kana: "ししゅつ", meaning: "支出", english: "Expenditure" },
+        { kanji: "自然", kana: "しぜん", meaning: "自然", english: "Nature" },
+        { kanji: "思想", kana: "しそう", meaning: "思想", english: "Thought" },
+        { kanji: "沈む", kana: "しずむ", meaning: "沉没", english: "Sink" },
+        { kanji: "従う", kana: "したがう", meaning: "遵从", english: "Obey" },
+        { kanji: "支度", kana: "したく", meaning: "准备", english: "Preparation" },
+        { kanji: "質", kana: "しつ", meaning: "质量", english: "Quality" },
+        { kanji: "失業", kana: "しつぎょう", meaning: "失业", english: "Unemployment" },
+        { kanji: "湿度", kana: "しつど", meaning: "湿度", english: "Humidity" },
+        { kanji: "執筆", kana: "しっぴつ", meaning: "执笔", english: "Writing" },
+        { kanji: "指導", kana: "しどう", meaning: "指导", english: "Guidance" },
+        { kanji: "縛る", kana: "しばる", meaning: "束缚", english: "Tie" },
+        { kanji: "支払う", kana: "しはらう", meaning: "支付", english: "Pay" },
+        { kanji: "死亡", kana: "しぼう", meaning: "死亡", english: "Death" },
+        { kanji: "資本", kana: "しほん", meaning: "资本", english: "Capital" },
+        { kanji: "姉妹", kana: "しまい", meaning: "姐妹", english: "Sisters" },
+        { kanji: "自慢", kana: "じまん", meaning: "自夸", english: "Pride" },
+        { kanji: "事務", kana: "じむ", meaning: "事务", english: "Office work" },
+        { kanji: "示す", kana: "しめす", meaning: "出示", english: "Show" },
+        { kanji: "占める", kana: "しめる", meaning: "占据", english: "Occupy" },
+        { kanji: "視野", kana: "しや", meaning: "视野", english: "Field of view" },
+        { kanji: "邪魔", kana: "じゃま", meaning: "打扰", english: "Hinder" },
+        { kanji: "周囲", kana: "しゅうい", meaning: "周围", english: "Surroundings" },
+        { kanji: "収穫", kana: "しゅうかく", meaning: "收获", english: "Harvest" },
+        { kanji: "宗教", kana: "しゅうきょう", meaning: "宗教", english: "Religion" },
+        { kanji: "重視", kana: "じゅうし", meaning: "重视", english: "Importance" },
+        { kanji: "就職", kana: "しゅうしょく", meaning: "就职", english: "Employment" },
+        { kanji: "修正", kana: "しゅうせい", meaning: "修正", english: "Correction" },
+        { kanji: "渋滞", kana: "じゅうたい", meaning: "堵车", english: "Traffic jam" },
+        { kanji: "重大", kana: "じゅうだい", meaning: "重大", english: "Serious" },
+        { kanji: "住宅", kana: "じゅうたく", meaning: "住宅", english: "Housing" },
+        { kanji: "集中", kana: "しゅうちゅう", meaning: "集中", english: "Concentration" },
+        { kanji: "収入", kana: "しゅうにゅう", meaning: "收入", english: "Income" },
+        { kanji: "住民", kana: "じゅうみん", meaning: "居民", english: "Resident" },
+        { kanji: "重要", kana: "じゅうよう", meaning: "重要", english: "Important" },
+        { kanji: "修理", kana: "しゅうり", meaning: "修理", english: "Repair" },
+        { kanji: "終了", kana: "しゅうりょう", meaning: "结束", english: "End" },
+        { kanji: "宿泊", kana: "しゅくはく", meaning: "住宿", english: "Lodging" },
+        { kanji: "受験", kana: "じゅけん", meaning: "应试", english: "Examination" },
+        { kanji: "首相", kana: "しゅしょう", meaning: "首相", english: "Prime Minister" },
+        { kanji: "出席", kana: "しゅっせき", meaning: "出席", english: "Attendance" },
+        { kanji: "出張", kana: "しゅっちょう", meaning: "出差", english: "Business trip" },
+        { kanji: "寿命", kana: "じゅみょう", meaning: "寿命", english: "Lifespan" },
+        { kanji: "需要", kana: "じゅよう", meaning: "需要", english: "Demand" },
+        { kanji: "順調", kana: "じゅんちょう", meaning: "顺利", english: "Smooth" },
+        { kanji: "準備", kana: "じゅんび", meaning: "准备", english: "Preparation" },
+        { kanji: "使用", kana: "しよう", meaning: "使用", english: "Use" },
+        { kanji: "賞金", kana: "しょうきん", meaning: "奖金", english: "Prize money" },
+        { kanji: "条件", kana: "じょうけん", meaning: "条件", english: "Condition" },
+        { kanji: "正直", kana: "しょうじき", meaning: "正直", english: "Honest" },
+        { kanji: "常識", kana: "じょうしき", meaning: "常识", english: "Common sense" },
+        { kanji: "少女", kana: "しょうじょ", meaning: "少女", english: "Girl" },
+        { kanji: "状態", kana: "じょうたい", meaning: "状态", english: "State" },
+        { kanji: "冗談", kana: "じょうだん", meaning: "玩笑", english: "Joke" },
+        { kanji: "承知", kana: "しょうち", meaning: "知道", english: "Consent" },
+        { kanji: "商店", kana: "しょうてん", meaning: "商店", english: "Shop" },
+        { kanji: "衝突", kana: "しょうとつ", meaning: "冲突", english: "Collision" },
+        { kanji: "承認", kana: "しょうにん", meaning: "承认", english: "Approval" },
+        { kanji: "少年", kana: "しょうねん", meaning: "少年", english: "Boy" },
+        { kanji: "勝負", kana: "しょうぶ", meaning: "胜负", english: "Match" },
+        { kanji: "情報", kana: "じょうほう", meaning: "情报", english: "Information" },
+        { kanji: "証明", kana: "しょうめい", meaning: "证明", english: "Proof" },
+        { kanji: "正面", kana: "しょうめん", meaning: "正面", english: "Front" },
+        { kanji: "消耗", kana: "しょうもう", meaning: "消耗", english: "Consumption" },
+        { kanji: "将来", kana: "しょうらい", meaning: "将来", english: "Future" },
+        { kanji: "食欲", kana: "しょくよく", meaning: "食欲", english: "Appetite" },
+        { kanji: "食料", kana: "しょくりょう", meaning: "食料", english: "Food" },
+        { kanji: "書斎", kana: "しょさい", meaning: "书房", english: "Study room" },
+        { kanji: "徐々に", kana: "じょじょに", meaning: "慢慢地", english: "Gradually" },
+        { kanji: "署名", kana: "しょめい", meaning: "签名", english: "Signature" },
+        { kanji: "処理", kana: "しょり", meaning: "处理", english: "Processing" },
+        { kanji: "書類", kana: "しょるい", meaning: "文件", english: "Document" },
+        { kanji: "知らせる", kana: "しらせる", meaning: "通知", english: "Notify" },
+        { kanji: "進学", kana: "しんがく", meaning: "升学", english: "Higher education" },
+        { kanji: "神経", kana: "しんけい", meaning: "神经", english: "Nerve" },
+        { kanji: "真剣", kana: "しんけん", meaning: "认真", english: "Serious" },
+        { kanji: "信仰", kana: "しんこう", meaning: "信仰", english: "Faith" },
+        { kanji: "人工", kana: "じんこう", meaning: "人工", english: "Artificial" },
+        { kanji: "深刻", kana: "しんこく", meaning: "严重", english: "Serious" },
+        { kanji: "診察", kana: "しんさつ", meaning: "诊察", english: "Medical exam" },
+        { kanji: "信じる", kana: "しんじる", meaning: "相信", english: "Believe" },
+        { kanji: "人事", kana: "じんじ", meaning: "人事", english: "HR" },
+        { kanji: "申請", kana: "しんせい", meaning: "申请", english: "Application" },
+        { kanji: "親戚", kana: "しんせき", meaning: "亲戚", english: "Relative" },
+        { kanji: "新鮮", kana: "しんせん", meaning: "新鲜", english: "Fresh" },
+        { kanji: "心臓", kana: "しんぞう", meaning: "心脏", english: "Heart" },
+        { kanji: "身体", kana: "しんたい", meaning: "身体", english: "Body" },
+        { kanji: "身長", kana: "しんちょう", meaning: "身高", english: "Height" },
+        { kanji: "慎重", kana: "しんちょう", meaning: "慎重", english: "Careful" },
+        { kanji: "侵入", kana: "しんにゅう", meaning: "侵入", english: "Invasion" },
+        { kanji: "心配", kana: "しんぱい", meaning: "担心", english: "Worry" },
+        { kanji: "審判", kana: "しんぱん", meaning: "审判", english: "Referee" },
+        { kanji: "人物", kana: "じんぶつ", meaning: "人物", english: "Person" },
+        { kanji: "進歩", kana: "しんぽ", meaning: "进步", english: "Progress" },
+        { kanji: "親友", kana: "しんゆう", meaning: "好友", english: "Close friend" },
+        { kanji: "信用", kana: "しんよう", meaning: "信用", english: "Trust" },
+        { kanji: "信頼", kana: "しんらい", meaning: "信赖", english: "Reliance" },
+        { kanji: "心理", kana: "しんり", meaning: "心理", english: "Psychology" },
+        { kanji: "人類", kana: "じんるい", meaning: "人类", english: "Mankind" },
+        
+        // す行
+        { kanji: "遂行", kana: "すいこう", meaning: "完成", english: "Execution" },
+        { kanji: "推薦", kana: "すいせん", meaning: "推荐", english: "Recommendation" },
+        { kanji: "睡眠", kana: "すいみん", meaning: "睡眠", english: "Sleep" },
+        { kanji: "数字", kana: "すうじ", meaning: "数字", english: "Number" },
+        { kanji: "救う", kana: "すくう", meaning: "拯救", english: "Save" },
+        { kanji: "優れる", kana: "すぐれる", meaning: "优秀", english: "Excellent" },
+        { kanji: "過ごす", kana: "すごす", meaning: "度过", english: "Spend time" },
+        { kanji: "筋", kana: "すじ", meaning: "肌肉", english: "Muscle/Plot" },
+        { kanji: "進める", kana: "すすめる", meaning: "推进", english: "Advance" },
+        { kanji: "勧める", kana: "すすめる", meaning: "推荐", english: "Recommend" },
+        { kanji: "捨てる", kana: "すてる", meaning: "扔掉", english: "Throw away" },
+        { kanji: "素敵", kana: "すてき", meaning: "极好", english: "Lovely" },
+        { kanji: "既に", kana: "すでの", meaning: "已经", english: "Already" },
+        { kanji: "滑る", kana: "すべる", meaning: "滑", english: "Slip" },
+        { kanji: "全て", kana: "すべて", meaning: "全部", english: "All" },
+        { kanji: "済ませる", kana: "すませる", meaning: "搞定", english: "Finish" },
+        { kanji: "鋭い", kana: "するどい", meaning: "敏锐", english: "Sharp" },
+        
+        // た行
+        { kanji: "常に", kana: "つねに", meaning: "经常", english: "Always" },
+        { kanji: "提案", kana: "ていあん", meaning: "提议", english: "Proposal" },
+        { kanji: "程度", kana: "ていど", meaning: "程度", english: "Degree" },
+        { kanji: "適用", kana: "てきよう", meaning: "适用", english: "Application" },
+        { kanji: "展開", kana: "てんかい", meaning: "展开", english: "Development" },
+        { kanji: "転換", kana: "てんかん", meaning: "转换", english: "Conversion" },
+        { kanji: "典型的", kana: "てんけいてき", meaning: "典型的", english: "Typical" },
+        { kanji: "登録", kana: "とうろく", meaning: "登记", english: "Registration" },
+        { kanji: "努力", kana: "どりょく", meaning: "努力", english: "Effort" },
+        { kanji: "倒産", kana: "とうさん", meaning: "破产", english: "Bankruptcy" },
+        { kanji: "投資", kana: "とうし", meaning: "投资", english: "Investment" },
+        { kanji: "当日", kana: "とうじつ", meaning: "当天", english: "That day" },
+        { kanji: "当然", kana: "とうぜん", meaning: "当然", english: "Natural" },
+        { kanji: "到着", kana: "とうちゃく", meaning: "到达", english: "Arrival" },
+        { kanji: "盗難", kana: "とうなん", meaning: "被盗", english: "Theft" },
+        { kanji: "投票", kana: "とうひょう", meaning: "投票", english: "Vote" },
+        { kanji: "都会", kana: "とかい", meaning: "都市", english: "City" },
+        { kanji: "得意", kana: "とくい", meaning: "擅长", english: "Good at" },
+        { kanji: "独特", kana: "どくとく", meaning: "独特", english: "Unique" },
+        { kanji: "独立", kana: "どくりつ", meaning: "独立", english: "Independence" },
+        { kanji: "溶ける", kana: "とける", meaning: "融化", english: "Melt" },
+        { kanji: "突然", kana: "とつぜん", meaning: "突然", english: "Sudden" },
+        { kanji: "届く", kana: "とどく", meaning: "送到", english: "Reach" },
+        { kanji: "整う", kana: "ととのう", meaning: "整齐", english: "Be ready" },
+        { kanji: "隣", kana: "となり", meaning: "旁边", english: "Next to" },
+        { kanji: "飛ばす", kana: "とばす", meaning: "飞", english: "Fly/Skip" },
+        { kanji: "泊まる", kana: "とまる", meaning: "住宿", english: "Stay" },
+        { kanji: "富む", kana: "とむ", meaning: "富有", english: "Rich in" },
+        { kanji: "伴う", kana: "ともなう", meaning: "伴随", english: "Accompany" },
+        { kanji: "退院", kana: "たいいん", meaning: "出院", english: "Discharge" },
+        { kanji: "対応", kana: "たいおう", meaning: "对应", english: "Response" },
+        { kanji: "大会", kana: "たいかい", meaning: "大会", english: "Tournament" },
+        { kanji: "大気", kana: "たいき", meaning: "大气", english: "Atmosphere" },
+        { kanji: "代金", kana: "だいきん", meaning: "货款", english: "Price" },
+        { kanji: "退屈", kana: "たいくつ", meaning: "无聊", english: "Boring" },
+        { kanji: "滞在", kana: "たいざい", meaning: "逗留", english: "Stay" },
+        { kanji: "対策", kana: "たいさく", meaning: "对策", english: "Measure" },
+        { kanji: "対象", kana: "たいしょう", meaning: "对象", english: "Target" },
+        { kanji: "大臣", kana: "だいじん", meaning: "大臣", english: "Minister" },
+        { kanji: "態度", kana: "たいど", meaning: "态度", english: "Attitude" },
+        { kanji: "代表", kana: "だいひょう", meaning: "代表", english: "Representative" },
+        { kanji: "逮捕", kana: "たいほ", meaning: "逮捕", english: "Arrest" },
+        { kanji: "代理", kana: "だいり", meaning: "代理", english: "Agent" },
+        { kanji: "互い", kana: "たがい", meaning: "互相", english: "Each other" },
+        { kanji: "耕す", kana: "たがやす", meaning: "耕作", english: "Plow" },
+        { kanji: "蓄える", kana: "たくわえる", meaning: "储备", english: "Store" },
+        { kanji: "確かめる", kana: "たしかめる", meaning: "确认", english: "Confirm" },
+        { kanji: "助ける", kana: "たすける", meaning: "帮助", english: "Help" },
+        { kanji: "戦う", kana: "たたかう", meaning: "战斗", english: "Fight" },
+        { kanji: "叩く", kana: "たたく", meaning: "敲打", english: "Hit" },
+        { kanji: "直ちに", kana: "ただちに", meaning: "立刻", english: "Immediately" },
+        { kanji: "立場", kana: "たちば", meaning: "立场", english: "Standpoint" },
+        { kanji: "経つ", kana: "たつ", meaning: "流逝", english: "Pass (time)" },
+        { kanji: "達する", kana: "たっする", meaning: "达到", english: "Reach" },
+        { kanji: "頼もしい", kana: "たのもしい", meaning: "可靠", english: "Reliable" },
+        { kanji: "旅", kana: "たび", meaning: "旅行", english: "Trip" },
+        { kanji: "騙す", kana: "だます", meaning: "欺骗", english: "Deceive" },
+        { kanji: "溜まる", kana: "たまる", meaning: "积攒", english: "Accumulate" },
+        { kanji: "黙る", kana: "だまる", meaning: "沉默", english: "Silence" },
+        { kanji: "試す", kana: "ためす", meaning: "尝试", english: "Try" },
+        { kanji: "頼る", kana: "たよる", meaning: "依赖", english: "Rely" },
+        { kanji: "誕生", kana: "たんじょう", meaning: "诞生", english: "Birth" },
+        { kanji: "短縮", kana: "たんしゅく", meaning: "缩短", english: "Shortening" },
+        { kanji: "単純", kana: "たんじゅん", meaning: "单纯", english: "Simple" },
+        { kanji: "担当", kana: "たんとう", meaning: "担当", english: "Charge" },
+        { kanji: "知恵", kana: "ちえ", meaning: "智慧", english: "Wisdom" },
+        { kanji: "地下", kana: "ちか", meaning: "地下", english: "Underground" },
+        { kanji: "違い", kana: "ちがい", meaning: "区别", english: "Difference" },
+        { kanji: "近づく", kana: "ちかづく", meaning: "靠近", english: "Approach" },
+        { kanji: "地球", kana: "ちきゅう", meaning: "地球", english: "Earth" },
+        { kanji: "遅刻", kana: "ちこく", meaning: "迟到", english: "Lateness" },
+        { kanji: "知人", kana: "ちじん", meaning: "熟人", english: "Acquaintance" },
+        { kanji: "縮む", kana: "ちぢむ", meaning: "收缩", english: "Shrink" },
+        { kanji: "地点", kana: "ちてん", meaning: "地点", english: "Point" },
+        { kanji: "知能", kana: "ちのう", meaning: "智能", english: "Intelligence" },
+        { kanji: "地方", kana: "ちほう", meaning: "地方", english: "Region" },
+        { kanji: "中央", kana: "ちゅうおう", meaning: "中央", english: "Center" },
+        { kanji: "中古", kana: "ちゅうこ", meaning: "二手", english: "Secondhand" },
+        { kanji: "中止", kana: "ちゅうし", meaning: "中止", english: "Cancellation" },
+        { kanji: "中心", kana: "ちゅうしん", meaning: "中心", english: "Center" },
+        { kanji: "注目", kana: "ちゅうもく", meaning: "注目", english: "Attention" },
+        { kanji: "注文", kana: "ちゅうもん", meaning: "点餐", english: "Order" },
+        { kanji: "超過", kana: "ちょうか", meaning: "超过", english: "Excess" },
+        { kanji: "長期", kana: "ちょうき", meaning: "长期", english: "Long term" },
+        { kanji: "調査", kana: "ちょうさ", meaning: "调查", english: "Survey" },
+        { kanji: "調子", kana: "ちょうし", meaning: "状况", english: "Condition" },
+        { kanji: "頂上", kana: "ちょうじょう", meaning: "山顶", english: "Summit" },
+        { kanji: "調整", kana: "ちょうせい", meaning: "调整", english: "Adjustment" },
+        { kanji: "貯金", kana: "ちょきん", meaning: "存钱", english: "Savings" },
+        { kanji: "直接", kana: "ちょくせつ", meaning: "直接", english: "Direct" },
+        { kanji: "著者", kana: "ちょしゃ", meaning: "作者", english: "Author" },
+        { kanji: "追加", kana: "ついか", meaning: "追加", english: "Addition" },
+        { kanji: "通過", kana: "つうか", meaning: "通过", english: "Passage" },
+        { kanji: "通貨", kana: "つうか", meaning: "货币", english: "Currency" },
+        { kanji: "通勤", kana: "つうきん", meaning: "通勤", english: "Commuting" },
+        { kanji: "通信", kana: "つうしん", meaning: "通信", english: "Communication" },
+        { kanji: "通知", kana: "つうち", meaning: "通知", english: "Notice" },
+        { kanji: "通訳", kana: "つうやく", meaning: "口译", english: "Interpretation" },
+        { kanji: "捕まる", kana: "つかまる", meaning: "被抓", english: "Caught" },
+        { kanji: "疲れ", kana: "つかれ", meaning: "疲劳", english: "Fatigue" },
+        { kanji: "付き合う", kana: "つきあう", meaning: "交往", english: "Date/Associate" },
+        { kanji: "着く", kana: "つく", meaning: "到达", english: "Arrive" },
+        { kanji: "作る", kana: "つくる", meaning: "制造", english: "Make" },
+        { kanji: "伝える", kana: "つたえる", meaning: "传达", english: "Convey" },
+        { kanji: "続く", kana: "つづく", meaning: "持续", english: "Continue" },
+        { kanji: "包む", kana: "つつむ", meaning: "包", english: "Wrap" },
+        { kanji: "勤める", kana: "つとめる", meaning: "工作", english: "Work" },
+        { kanji: "繋ぐ", kana: "つなぐ", meaning: "连接", english: "Connect" },
+        { kanji: "潰れる", kana: "つぶれる", meaning: "崩溃", english: "Collapse" },
+        { kanji: "積む", kana: "つむ", meaning: "堆积", english: "Pile" },
+        { kanji: "強気", kana: "つよき", meaning: "逞强", english: "Bullish" },
+        { kanji: "釣り", kana: "つり", meaning: "钓鱼", english: "Fishing" },
+        { kanji: "連れる", kana: "つれる", meaning: "带领", english: "Lead" },
+        { kanji: "定期", kana: "ていき", meaning: "定期", english: "Fixed term" },
+        { kanji: "抵抗", kana: "ていこう", meaning: "抵抗", english: "Resistance" },
+        { kanji: "提出", kana: "ていしゅつ", meaning: "提交", english: "Submission" },
+        { kanji: "停電", kana: "ていでん", meaning: "停电", english: "Blackout" },
+        { kanji: "敵", kana: "てき", meaning: "敌人", english: "Enemy" },
+        { kanji: "出来事", kana: "できごと", meaning: "事情", english: "Event" },
+        { kanji: "適当", kana: "てきとう", meaning: "适当", english: "Appropriate" },
+        { kanji: "哲学", kana: "てつがく", meaning: "哲学", english: "Philosophy" },
+        { kanji: "手伝い", kana: "てつだい", meaning: "帮忙", english: "Help" },
+        { kanji: "手続き", kana: "てつづき", meaning: "手续", english: "Procedure" },
+        { kanji: "徹夜", kana: "てつや", meaning: "通宵", english: "All night" },
+        { kanji: "手間", kana: "てま", meaning: "劳力", english: "Labor/Time" },
+        { kanji: "天気", kana: "てんき", meaning: "天气", english: "Weather" },
+        { kanji: "展示", kana: "てんじ", meaning: "展示", english: "Exhibition" },
+        { kanji: "天井", kana: "てんじょう", meaning: "天花板", english: "Ceiling" },
+        { kanji: "点数", kana: "てんすう", meaning: "分数", english: "Score" },
+        { kanji: "伝染", kana: "でんせん", meaning: "传染", english: "Infection" },
+        { kanji: "天然", kana: "てんねん", meaning: "天然", english: "Natural" },
+        { kanji: "問い合わせ", kana: "といあわせ", meaning: "咨询", english: "Inquiry" },
+        { kanji: "統一", kana: "とういつ", meaning: "统一", english: "Unity" },
+        { kanji: "同僚", kana: "どうりょう", meaning: "同事", english: "Colleague" },
+        { kanji: "道路", kana: "どうろ", meaning: "道路", english: "Road" },
+        
+        // な行
+        { kanji: "仲間", kana: "なかま", meaning: "伙伴", english: "Friend/Fellow" },
+        { kanji: "眺める", kana: "ながめる", meaning: "眺望", english: "Gaze" },
+        { kanji: "流れ", kana: "ながれ", meaning: "流动", english: "Flow" },
+        { kanji: "慰める", kana: "なぐさめる", meaning: "安慰", english: "Comfort" },
+        { kanji: "亡くなる", kana: "なくなる", meaning: "去世", english: "Pass away" },
+        { kanji: "投げる", kana: "なげる", meaning: "投掷", english: "Throw" },
+        { kanji: "納得", kana: "なっとく", meaning: "理解", english: "Consent" },
+        { kanji: "南極", kana: "なんきょく", meaning: "南极", english: "Antarctica" },
+        { kanji: "匂い", kana: "におい", meaning: "气味", english: "Smell" },
+        { kanji: "苦い", kana: "にがい", meaning: "苦", english: "Bitter" },
+        { kanji: "憎い", kana: "にくい", meaning: "可憎", english: "Hateful" },
+        { kanji: "日常", kana: "にちじょう", meaning: "日常", english: "Daily life" },
+        { kanji: "日光", kana: "にっこう", meaning: "日光", english: "Sunlight" },
+        { kanji: "入社", kana: "にゅうしゃ", meaning: "入职", english: "Join company" },
+        { kanji: "入力", kana: "にゅうりょく", meaning: "输入", english: "Input" },
+        { kanji: "任務", kana: "にんむ", meaning: "任务", english: "Mission" },
+        { kanji: "抜く", kana: "ぬく", meaning: "拔", english: "Pull out" },
+        { kanji: "濡れる", kana: "ぬれる", meaning: "湿", english: "Get wet" },
+        { kanji: "熱帯", kana: "ねったい", meaning: "热带", english: "Tropics" },
+        { kanji: "熱心", kana: "ねっしん", meaning: "热心", english: "Enthusiastic" },
+        { kanji: "年度", kana: "ねんど", meaning: "年度", english: "Fiscal year" },
+        { kanji: "年齢", kana: "ねんれい", meaning: "年龄", english: "Age" },
+        { kanji: "農家", kana: "のうか", meaning: "农户", english: "Farmer" },
+        { kanji: "農業", kana: "のうぎょう", meaning: "农业", english: "Agriculture" },
+        { kanji: "能力", kana: "のうりょく", meaning: "能力", english: "Ability" },
+        { kanji: "残す", kana: "のこす", meaning: "留下", english: "Leave" },
+        { kanji: "除く", kana: "のぞく", meaning: "除去", english: "Remove" },
+        { kanji: "望む", kana: "のぞむ", meaning: "希望", english: "Desire" },
+        { kanji: "伸ばす", kana: "のばす", meaning: "伸展", english: "Extend" },
+        { kanji: "述べる", kana: "のべる", meaning: "陈述", english: "State" },
+        { kanji: "上る", kana: "のぼる", meaning: "上升", english: "Climb" },
+
+        // は行
+        { kanji: "背景", kana: "はいけい", meaning: "背景", english: "Background" },
+        { kanji: "発生", kana: "はっせい", meaning: "发生", english: "Occurrence" },
+        { kanji: "判断", kana: "はんだん", meaning: "判断", english: "Judgment" },
+        { kanji: "評価", kana: "ひょうか", meaning: "评价", english: "Evaluation" },
+        { kanji: "表現", kana: "ひょうげん", meaning: "表现", english: "Expression" },
+        { kanji: "普及", kana: "ふきゅう", meaning: "普及", english: "Diffusion" },
+        { kanji: "複数", kana: "ふくすう", meaning: "复数", english: "Multiple" },
+        { kanji: "分析", kana: "ぶんせき", meaning: "分析", english: "Analysis" },
+        { kanji: "分野", kana: "ぶんや", meaning: "领域", english: "Field" },
+        { kanji: "平均", kana: "へいきん", meaning: "平均", english: "Average" },
+        { kanji: "変更", kana: "へんこう", meaning: "变更", english: "Change" },
+        { kanji: "編集", kana: "へんしゅう", meaning: "编辑", english: "Editing" },
+        { kanji: "保存", kana: "ほぞん", meaning: "保存", english: "Save" },
+        { kanji: "報告", kana: "ほうこく", meaning: "报告", english: "Report" },
+        { kanji: "方法", kana: "ほうほう", meaning: "方法", english: "Method" },
+        { kanji: "防止", kana: "ぼうし", meaning: "防止", english: "Prevention" },
+        { kanji: "法律", kana: "ほうりつ", meaning: "法律", english: "Law" },
+        { kanji: "把握", kana: "はあく", meaning: "把握", english: "Grasp" },
+        { kanji: "激しい", kana: "はげしい", meaning: "激烈", english: "Violent" },
+        { kanji: "挟む", kana: "はさむ", meaning: "夹", english: "Hold between" },
+        { kanji: "肌", kana: "はだ", meaning: "肌肤", english: "Skin" },
+        { kanji: "畑", kana: "はたけ", meaning: "旱田", english: "Field" },
+        { kanji: "果たす", kana: "はたす", meaning: "实现", english: "Fulfill" },
+        { kanji: "働き", kana: "はたらき", meaning: "工作", english: "Work" },
+        { kanji: "発見", kana: "はっけん", meaning: "发现", english: "Discovery" },
+        { kanji: "発行", kana: "はっこう", meaning: "发行", english: "Issue" },
+        { kanji: "発達", kana: "はったつ", meaning: "发达", english: "Development" },
+        { kanji: "発展", kana: "はってん", meaning: "发展", english: "Expansion" },
+        { kanji: "発表", kana: "はっぴょう", meaning: "发表", english: "Announcement" },
+        { kanji: "発明", kana: "はつめい", meaning: "发明", english: "Invention" },
+        { kanji: "派手", kana: "はで", meaning: "华丽", english: "Flashy" },
+        { kanji: "話", kana: "はなし", meaning: "故事", english: "Story" },
+        { kanji: "離れる", kana: "はなれる", meaning: "离开", english: "Leave" },
+        { kanji: "幅", kana: "はば", meaning: "宽度", english: "Width" },
+        { kanji: "省く", kana: "はぶく", meaning: "省略", english: "Omit" },
+        { kanji: "場面", kana: "ばめん", meaning: "场面", english: "Scene" },
+        { kanji: "流行る", kana: "はやる", meaning: "流行", english: "Trend" },
+        { kanji: "払い戻す", kana: "はらいもどす", meaning: "退款", english: "Refund" },
+        { kanji: "針", kana: "はり", meaning: "针", english: "Needle" },
+        { kanji: "範囲", kana: "はんい", meaning: "范围", english: "Range" },
+        { kanji: "反抗", kana: "はんこう", meaning: "反抗", english: "Resistance" },
+        { kanji: "犯罪", kana: "はんざい", meaning: "犯罪", english: "Crime" },
+        { kanji: "反省", kana: "はんせい", meaning: "反省", english: "Reflection" },
+        { kanji: "反対", kana: "はんたい", meaning: "反对", english: "Opposition" },
+        { kanji: "販売", kana: "はんばい", meaning: "贩卖", english: "Sales" },
+        { kanji: "被害", kana: "ひがい", meaning: "受害", english: "Damage" },
+        { kanji: "比較", kana: "ひかく", meaning: "比较", english: "Comparison" },
+        { kanji: "悲劇", kana: "ひげき", meaning: "悲剧", english: "Tragedy" },
+        { kanji: "飛行", kana: "ひこう", meaning: "飞行", english: "Flight" },
+        { kanji: "膝", kana: "ひざ", meaning: "膝盖", english: "Knee" },
+        { kanji: "非常", kana: "ひじょう", meaning: "非常", english: "Emergency" },
+        { kanji: "美人", kana: "びじん", meaning: "美人", english: "Beauty" },
+        { kanji: "必死", kana: "ひっし", meaning: "拼命", english: "Desperate" },
+        { kanji: "否定", kana: "ひてい", meaning: "否定", english: "Denial" },
+        { kanji: "批判", kana: "ひはん", meaning: "批判", english: "Criticism" },
+        { kanji: "批评", kana: "ひひょう", meaning: "批评", english: "Review" },
+        { kanji: "秘密", kana: "ひみつ", meaning: "秘密", english: "Secret" },
+        { kanji: "微妙", kana: "びみょう", meaning: "微妙", english: "Subtle" },
+        { kanji: "費用", kana: "ひよう", meaning: "费用", english: "Cost" },
+        { kanji: "表", kana: "ひょう", meaning: "表格", english: "Table" },
+        { kanji: "評判", kana: "ひょうばん", meaning: "名声", english: "Reputation" },
+        { kanji: "表面", kana: "ひょうめん", meaning: "表面", english: "Surface" },
+        { kanji: "昼寝", kana: "ひるね", meaning: "午睡", english: "Nap" },
+        { kanji: "広がる", kana: "ひろがる", meaning: "扩散", english: "Spread" },
+        { kanji: "風景", kana: "ふうけい", meaning: "风景", english: "Scenery" },
+        { kanji: "防ぐ", kana: "ふせぐ", meaning: "防御", english: "Prevent" },
+        { kanji: "不足", kana: "ふそく", meaning: "不足", english: "Shortage" },
+        { kanji: "舞台", kana: "ぶたい", meaning: "舞台", english: "Stage" },
+        { kanji: "双子", kana: "ふたご", meaning: "双胞胎", english: "Twins" },
+        { kanji: "再び", kana: "ふたたび", meaning: "再次", english: "Again" },
+        { kanji: "普段", kana: "ふだん", meaning: "平时", english: "Usually" },
+        { kanji: "不平", kana: "ふへい", meaning: "不平", english: "Complaint" },
+        { kanji: "不満", kana: "ふまん", meaning: "不满", english: "Dissatisfaction" },
+        { kanji: "増やす", kana: "ふやす", meaning: "增加", english: "Increase" },
+        { kanji: "振る", kana: "ふる", meaning: "挥", english: "Shake" },
+        { kanji: "震える", kana: "ふるえる", meaning: "颤抖", english: "Tremble" },
+        { kanji: "風呂", kana: "ふろ", meaning: "澡盆", english: "Bath" },
+        { kanji: "雰囲気", kana: "ふんいき", meaning: "气氛", english: "Atmosphere" },
+        { kanji: "文明", kana: "ぶんめい", meaning: "文明", english: "Civilization" },
+        { kanji: "平和", kana: "へいわ", meaning: "和平", english: "Peace" },
+        { kanji: "減らす", kana: "へらす", meaning: "减少", english: "Decrease" },
+        { kanji: "勉強", kana: "べんきょう", meaning: "学习", english: "Study" },
+        { kanji: "便利", kana: "べんり", meaning: "便利", english: "Convenient" },
+        { kanji: "貿易", kana: "ぼうえき", meaning: "贸易", english: "Trade" },
+        { kanji: "帽子", kana: "ぼうし", meaning: "帽子", english: "Hat" },
+        { kanji: "訪問", kana: "ほうもん", meaning: "访问", english: "Visit" },
+        { kanji: "吠える", kana: "ほえる", meaning: "吠", english: "Bark" },
+        { kanji: "誇り", kana: "ほこり", meaning: "自豪", english: "Pride" },
+        { kanji: "保証", kana: "ほしょう", meaning: "保证", english: "Guarantee" },
+        { kanji: "骨", kana: "ほね", meaning: "骨头", english: "Bone" },
+        { kanji: "微笑む", kana: "ほほえむ", meaning: "微笑", english: "Smile" },
+        { kanji: "褒める", kana: "ほめる", meaning: "表扬", english: "Praise" },
+        { kanji: "本気", kana: "ほんき", meaning: "认真", english: "Seriousness" },
+
+        // ま行
+        { kanji: "魅力", kana: "みりょく", meaning: "魅力", english: "Charm" },
+        { kanji: "民間", kana: "みんかん", meaning: "民间", english: "Private" },
+        { kanji: "目的", kana: "もくてき", meaning: "目的", english: "Purpose" },
+        { kanji: "目標", kana: "もくひょう", meaning: "目标", english: "Goal" },
+        { kanji: "迷子", kana: "まいご", meaning: "迷路", english: "Lost child" },
+        { kanji: "任せる", kana: "まかせる", meaning: "委托", english: "Entrust" },
+        { kanji: "幕", kana: "まく", meaning: "幕布", english: "Curtain" },
+        { kanji: "負ける", kana: "まける", meaning: "输", english: "Lose" },
+        { kanji: "混ざる", kana: "まざる", meaning: "混杂", english: "Mix" },
+        { kanji: "増す", kana: "ます", meaning: "增加", english: "Increase" },
+        { kanji: "貧しい", kana: "まずしい", meaning: "贫穷", english: "Poor" },
+        { kanji: "益々", kana: "ますます", meaning: "越发", english: "Increasingly" },
+        { kanji: "祭", kana: "まつり", meaning: "祭典", english: "Festival" },
+        { kanji: "真似", kana: "まね", meaning: "模仿", english: "Imitation" },
+        { kanji: "招く", kana: "まねく", meaning: "招待", english: "Invite" },
+        { kanji: "守る", kana: "まもる", meaning: "遵守", english: "Protect" },
+        { kanji: "丸", kana: "まる", meaning: "圆", english: "Circle" },
+        { kanji: "回す", kana: "まわす", meaning: "转动", english: "Turn" },
+        { kanji: "満足", kana: "まんぞく", meaning: "满足", english: "Satisfaction" },
+        { kanji: "真ん中", kana: "まんなか", meaning: "中间", english: "Center" },
+        { kanji: "見送る", kana: "みおくる", meaning: "送行", english: "See off" },
+        { kanji: "味方", kana: "みかた", meaning: "同伴", english: "Ally" },
+        { kanji: "見事", kana: "みごと", meaning: "精彩", english: "Splendid" },
+        { kanji: "満ちる", kana: "みちる", meaning: "充满", english: "Full" },
+        { kanji: "認める", kana: "みとめる", meaning: "认可", english: "Admit" },
+        { kanji: "港", kana: "みなと", meaning: "港口", english: "Port" },
+        { kanji: "身分", kana: "みぶん", meaning: "身份", english: "Status" },
+        { kanji: "見舞い", kana: "みまい", meaning: "探望", english: "Visit (sick)" },
+        { kanji: "未満", kana: "みまん", meaning: "不满", english: "Less than" },
+        { kanji: "名字", kana: "みょうじ", meaning: "姓氏", english: "Surname" },
+        { kanji: "未来", kana: "みらい", meaning: "未来", english: "Future" },
+        { kanji: "向かう", kana: "むかう", meaning: "前往", english: "Head for" },
+        { kanji: "迎える", kana: "むかえる", meaning: "迎接", english: "Welcome" },
+        { kanji: "無視", kana: "むし", meaning: "无视", english: "Ignore" },
+        { kanji: "結ぶ", kana: "むすぶ", meaning: "连接", english: "Tie" },
+        { kanji: "無駄", kana: "むだ", meaning: "徒劳", english: "Waste" },
+        { kanji: "夢中", kana: "むちゅう", meaning: "热衷", english: "Obsessed" },
+        { kanji: "無料", kana: "むりょう", meaning: "免费", english: "Free" },
+        { kanji: "明確", kana: "めいかく", meaning: "明确", english: "Clear" },
+        { kanji: "命じる", kana: "めいじる", meaning: "命令", english: "Order" },
+        { kanji: "名人", kana: "めいじん", meaning: "名人", english: "Master" },
+        { kanji: "迷惑", kana: "めいわく", meaning: "麻烦", english: "Trouble" },
+        { kanji: "恵まれる", kana: "めぐまれる", meaning: "受恩惠", english: "Blessed" },
+        { kanji: "目立つ", kana: "めだつ", meaning: "显眼", english: "Stand out" },
+        { kanji: "免許", kana: "めんきょ", meaning: "执照", english: "License" },
+        { kanji: "面倒", kana: "めんどう", meaning: "麻烦", english: "Troublesome" },
+        { kanji: "文字", kana: "もじ", meaning: "文字", english: "Character" },
+        { kanji: "最も", kana: "もっとも", meaning: "最", english: "Most" },
+        { kanji: "物語", kana: "ものがたり", meaning: "故事", english: "Story" },
+        { kanji: "模様", kana: "もよう", meaning: "花纹", english: "Pattern" },
+        { kanji: "文句", kana: "もんく", meaning: "抱怨", english: "Complaint" },
+
+        // や行
+        { kanji: "役割", kana: "やくわり", meaning: "角色", english: "Role" },
+        { kanji: "唯一", kana: "ゆいいつ", meaning: "唯一", english: "Only" },
+        { kanji: "有効", kana: "ゆうこう", meaning: "有效", english: "Valid" },
+        { kanji: "優先", kana: "ゆうせん", meaning: "优先", english: "Priority" },
+        { kanji: "豊か", kana: "ゆたか", meaning: "丰富", english: "Rich" },
+        { kanji: "容易", kana: "ようい", meaning: "容易", english: "Easy" },
+        { kanji: "要求", kana: "ようきゅう", meaning: "要求", english: "Demand" },
+        { kanji: "厄介", kana: "やっかい", meaning: "麻烦", english: "Troublesome" },
+        { kanji: "宿", kana: "やど", meaning: "宿处", english: "Inn" },
+        { kanji: "雇う", kana: "やとう", meaning: "雇佣", english: "Employ" },
+        { kanji: "屋根", kana: "やね", meaning: "屋顶", english: "Roof" },
+        { kanji: "破る", kana: "やぶる", meaning: "弄破", english: "Tear/Break" },
+        { kanji: "辞める", kana: "やめる", meaning: "辞职", english: "Quit" },
+        { kanji: "勇気", kana: "ゆうき", meaning: "勇气", english: "Courage" },
+        { kanji: "優勝", kana: "ゆうしょう", meaning: "优胜", english: "Championship" },
+        { kanji: "友情", kana: "ゆうじょう", meaning: "友情", english: "Friendship" },
+        { kanji: "友人", kana: "ゆうじん", meaning: "友人", english: "Friend" },
+        { kanji: "有能", kana: "ゆうのう", meaning: "有能力", english: "Capable" },
+        { kanji: "郵便", kana: "ゆうびん", meaning: "邮件", english: "Mail" },
+        { kanji: "夕べ", kana: "ゆうべ", meaning: "昨晚", english: "Evening" },
+        { kanji: "有利", kana: "ゆうり", meaning: "有利", english: "Advantageous" },
+        { kanji: "床", kana: "ゆか", meaning: "地板", english: "Floor" },
+        { kanji: "輸入", kana: "ゆにゅう", meaning: "进口", english: "Import" },
+        { kanji: "許す", kana: "ゆるす", meaning: "原谅", english: "Forgive" },
+        { kanji: "夜明け", kana: "よあけ", meaning: "黎明", english: "Dawn" },
+        { kanji: "酔う", kana: "よう", meaning: "醉", english: "Drunk" },
+        { kanji: "陽気", kana: "ようき", meaning: "开朗", english: "Cheerful" },
+        { kanji: "用心", kana: "ようじん", meaning: "小心", english: "Caution" },
+        { kanji: "様子", kana: "ようす", meaning: "样子", english: "Appearance" },
+        { kanji: "要素", kana: "ようそ", meaning: "要素", english: "Element" },
+        { kanji: "要点", kana: "ようてん", meaning: "要点", english: "Point" },
+        { kanji: "予期", kana: "よき", meaning: "预期", english: "Expectation" },
+        { kanji: "予算", kana: "よさん", meaning: "预算", english: "Budget" },
+        { kanji: "予測", kana: "よそく", meaning: "预测", english: "Prediction" },
+        { kanji: "夜中", kana: "よなか", meaning: "半夜", english: "Midnight" },
+        { kanji: "世の中", kana: "よのなか", meaning: "世上", english: "World" },
+        { kanji: "余分", kana: "よぶん", meaning: "多余", english: "Extra" },
+        { kanji: "予報", kana: "よほう", meaning: "预报", english: "Forecast" },
+        { kanji: "予防", kana: "よぼう", meaning: "预防", english: "Prevention" },
+        { kanji: "嫁", kana: "よめ", meaning: "媳妇", english: "Bride" },
+        { kanji: "余裕", kana: "よゆう", meaning: "富余", english: "Room/Space" },
+        { kanji: "喜び", kana: "よろこび", meaning: "喜悦", english: "Joy" },
+        { kanji: "喜ぶ", kana: "よろこぶ", meaning: "高兴", english: "Rejoice" },
+
+        // ら行
+        { kanji: "利益", kana: "りえき", meaning: "利益", english: "Profit" },
+        { kanji: "理解", kana: "りかい", meaning: "理解", english: "Understanding" },
+        { kanji: "利口", kana: "りこう", meaning: "聪明", english: "Clever" },
+        { kanji: "離婚", kana: "りこん", meaning: "离婚", english: "Divorce" },
+        { kanji: "理想", kana: "りそう", meaning: "理想", english: "Ideal" },
+        { kanji: "率", kana: "りつ", meaning: "率", english: "Rate" },
+        { kanji: "流行", kana: "りゅうこう", meaning: "流行", english: "Trend" },
+        { kanji: "量", kana: "りょう", meaning: "量", english: "Quantity" },
+        { kanji: "両替", kana: "りょうがえ", meaning: "兑换", english: "Exchange" },
+        { kanji: "料金", kana: "りょうきん", meaning: "费用", english: "Charge" },
+        { kanji: "例外", kana: "れいがい", meaning: "例外", english: "Exception" },
+        { kanji: "礼儀", kana: "れいぎ", meaning: "礼仪", english: "Manners" },
+        { kanji: "冷静", kana: "れいせい", meaning: "冷静", english: "Calm" },
+        { kanji: "歴史", kana: "れきし", meaning: "历史", english: "History" },
+        { kanji: "列", kana: "れつ", meaning: "列", english: "Row" },
+        { kanji: "列車", kana: "れっしゃ", meaning: "列车", english: "Train" },
+        { kanji: "練習", kana: "れんしゅう", meaning: "练习", english: "Practice" },
+        { kanji: "連想", kana: "れんそう", meaning: "联想", english: "Association" },
+        { kanji: "連続", kana: "れんぞく", meaning: "连续", english: "Continuation" },
+        { kanji: "老人", kana: "ろうじん", meaning: "老人", english: "Old person" },
+        { kanji: "労働", kana: "ろうどう", meaning: "劳动", english: "Labor" },
+        { kanji: "論じる", kana: "ろんじる", meaning: "论述", english: "Discuss" },
+        { kanji: "論争", kana: "ろんそう", meaning: "争论", english: "Controversy" },
+        { kanji: "論文", kana: "ろんぶん", meaning: "论文", english: "Thesis" },
+
+        // わ行
+        { kanji: "惑星", kana: "わくせい", meaning: "行星", english: "Planet" },
+        { kanji: "技", kana: "わざ", meaning: "技能", english: "Skill" },
+        { kanji: "話題", kana: "わだい", meaning: "话题", english: "Topic" },
+        { kanji: "詫びる", kana: "わびる", meaning: "道歉", english: "Apologize" },
+        { kanji: "笑う", kana: "わらう", meaning: "笑", english: "Laugh" },
+        { kanji: "割る", kana: "わる", meaning: "打破", english: "Break/Divide" },
+        { kanji: "悪口", kana: "わるくち", meaning: "坏话", english: "Bad mouth" },
+        { kanji: "我々", kana: "われわれ", meaning: "我们", english: "We" },
+        { kanji: "湾", kana: "わん", meaning: "海湾", english: "Bay" }
+    ];
+
+    // -----------------------------------------------------------------
+    // 语义图标逻辑
+    // -----------------------------------------------------------------
+    function getSemanticIcon(text) {
+        const t = text.toLowerCase();
+        if(t.includes("金") || t.includes("费") || t.includes("财")) return "💰";
+        if(t.includes("时") || t.includes("刻") || t.includes("钟")) return "⏰";
+        if(t.includes("吃") || t.includes("饭") || t.includes("食")) return "🍱";
+        if(t.includes("喝") || t.includes("酒") || t.includes("水")) return "🍵";
+        if(t.includes("学") || t.includes("书") || t.includes("读")) return "📚";
+        if(t.includes("走") || t.includes("行") || t.includes("跑")) return "🏃";
+        if(t.includes("车") || t.includes("通") || t.includes("运")) return "🚄";
+        if(t.includes("想") || t.includes("思") || t.includes("考")) return "💡";
+        if(t.includes("心") || t.includes("爱") || t.includes("情")) return "❤️";
+        if(t.includes("话") || t.includes("语") || t.includes("言")) return "🗣️";
+        if(t.includes("看") || t.includes("视") || t.includes("见")) return "👁️";
+        if(t.includes("手") || t.includes("指") || t.includes("拿")) return "🖐️";
+        if(t.includes("家") || t.includes("屋") || t.includes("住")) return "🏠";
+        if(t.includes("人") || t.includes("民") || t.includes("员")) return "🧑‍🤝‍🧑";
+        if(t.includes("病") || t.includes("痛") || t.includes("医")) return "💊";
+        if(t.includes("天") || t.includes("气") || t.includes("雨")) return "🌤️";
+        if(t.includes("地") || t.includes("球") || t.includes("山")) return "🌍";
+        if(t.includes("工") || t.includes("作") || t.includes("业")) return "💼";
+        if(t.includes("战") || t.includes("争") || t.includes("敌")) return "⚔️";
+        if(t.includes("法") || t.includes("律") || t.includes("规")) return "⚖️";
+        if(t.includes("服") || t.includes("衣") || t.includes("穿")) return "👕";
+        if(t.includes("数") || t.includes("量") || t.includes("算")) return "🔢";
+        if(t.includes("音") || t.includes("乐") || t.includes("歌")) return "🎵";
+        if(t.includes("电") || t.includes("机") || t.includes("网")) return "💻";
+        if(t.includes("动") || t.includes("物")) return "🐾";
+        if(t.includes("植") || t.includes("花") || t.includes("草")) return "🌿";
+        if(t.includes("险") || t.includes("危") || t.includes("警")) return "⚠️";
+        if(t.includes("好") || t.includes("优") || t.includes("良")) return "✨";
+        if(t.includes("坏") || t.includes("恶") || t.includes("劣")) return "💢";
+        return null; // 找不到图标时返回null
+    }
+
+    // -----------------------------------------------------------------
+    // 应用逻辑
+    // -----------------------------------------------------------------
+    let currentTab = 'list';
+    let quizState = null;
+    const synth = window.speechSynthesis;
+    let jaVoice = null;
+
+    // 加载并锁定日语语音包
+    function loadVoices() {
+        const voices = synth.getVoices();
+        // 尝试找到精确的 ja-JP
+        jaVoice = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP');
+        // 如果没有，尝试找到任何包含 'ja' 的 lang
+        if (!jaVoice) {
+            jaVoice = voices.find(v => v.lang.startsWith('ja'));
+        }
+    }
+
+    // Chrome 等浏览器是异步加载语音列表的，需要监听
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    loadVoices(); // 立即尝试加载
+
+    function getKanaRow(char) {
+        const c = char.charAt(0);
+        const rows = [
+            { chars: 'あいうえお', name: 'A - あ行' },
+            { chars: 'かきくけこがぎぐげご', name: 'Ka - か行' },
+            { chars: 'さしすせそざじずぜぞ', name: 'Sa - さ行' },
+            { chars: 'たちつてとだぢづでど', name: 'Ta - た行' },
+            { chars: 'なにぬねの', name: 'Na - な行' },
+            { chars: 'はひふへほばびぶべぼぱぴぷぺぽ', name: 'Ha - は行' },
+            { chars: 'まみむめも', name: 'Ma - ま行' },
+            { chars: 'やゆよ', name: 'Ya - や行' },
+            { chars: 'らりるれろ', name: 'Ra - ら行' },
+            { chars: 'わをん', name: 'Wa - わ行' }
+        ];
+        for(let r of rows) {
+            if (r.chars.includes(c)) return r.name;
+        }
+        return 'Others';
+    }
+
+    function init() {
+        vocabulary.sort((a, b) => a.kana.localeCompare(b.kana));
+        
+        const jumpNav = document.getElementById('jump-nav');
+        const labels = ['A','Ka','Sa','Ta','Na','Ha','Ma','Ya','Ra','Wa'];
+        labels.forEach(l => {
+            const a = document.createElement('a');
+            a.href = `#row-${l}`;
+            a.innerText = l;
+            a.onclick = (e) => {
+                e.preventDefault();
+                const el = document.getElementById(`row-${l}`);
+                if(el) {
+                    const offset = 140; 
+                    const pos = el.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({top: pos, behavior: "smooth"});
+                }
+            };
+            jumpNav.appendChild(a);
+        });
+
+        render();
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('btn-list').className = tab === 'list' ? 'nav-btn active' : 'nav-btn';
+        document.getElementById('btn-quiz').className = tab === 'quiz' ? 'nav-btn active' : 'nav-btn';
+        document.querySelector('.search-box').style.display = tab === 'list' ? 'block' : 'none';
+        document.getElementById('jump-nav').style.display = tab === 'list' ? 'flex' : 'none';
+        render();
+    }
+
+    function render() {
+        const app = document.getElementById('app');
+        app.innerHTML = '';
+        if (currentTab === 'list') renderList(app);
+        else renderQuiz(app);
+    }
+
+    function renderList(container) {
+        const filter = document.querySelector('.search-box').value.toLowerCase();
+        let displayList = vocabulary;
+        
+        if (filter) {
+            displayList = vocabulary.filter(w => 
+                w.kanji.includes(filter) || 
+                w.kana.includes(filter) || 
+                w.meaning.includes(filter) ||
+                w.english.toLowerCase().includes(filter)
+            );
+            const grid = document.createElement('div');
+            grid.className = 'word-grid';
+            displayList.forEach(word => grid.appendChild(createCard(word)));
+            container.appendChild(grid);
+            return;
+        }
+
+        let lastRow = '';
+        let currentGrid = null;
+
+        displayList.forEach(word => {
+            const row = getKanaRow(word.kana);
+            if (row !== lastRow) {
+                lastRow = row;
+                const label = row.split(' - ')[0]; 
+                const header = document.createElement('div');
+                header.className = 'row-header';
+                header.id = `row-${label}`;
+                header.innerHTML = `${label} <span>${row.split(' - ')[1]}</span>`;
+                container.appendChild(header);
+
+                currentGrid = document.createElement('div');
+                currentGrid.className = 'word-grid';
+                container.appendChild(currentGrid);
+            }
+            currentGrid.appendChild(createCard(word));
+        });
+    }
+
+    function createCard(word) {
+        const el = document.createElement('div');
+        el.className = 'anime-card';
+        el.onclick = () => speak(word.kanji);
+        
+        // 视觉逻辑：如果有Icon就显示Icon，没有就显示大号英文单词
+        const icon = getSemanticIcon(word.meaning);
+        let visualHtml = '';
+        
+        if (icon) {
+            visualHtml = `<div class="card-icon">${icon}</div>`;
+        } else {
+            // Fallback: 使用英语单词作为视觉主体
+            visualHtml = `<div class="card-text-visual">${word.english}</div>`;
+        }
+
+        el.innerHTML = `
+            <div class="card-visual">
+                ${visualHtml}
+                <div class="audio-icon">🔊</div>
+            </div>
+            <div class="card-info">
+                <div class="info-top">
+                    <div class="kanji">${word.kanji}</div>
+                    <div class="kana">${word.kana}</div>
+                </div>
+                <div class="meanings-box">
+                    <div class="meaning-cn">${word.meaning}</div>
+                    <div class="meaning-en">${word.english}</div>
+                </div>
+            </div>
+        `;
+        return el;
+    }
+
+    function renderQuiz(container) {
+        if (!quizState) nextQuestion();
+
+        const wrap = document.createElement('div');
+        wrap.className = 'quiz-wrapper';
+        
+        wrap.innerHTML = `
+            <div class="quiz-card">
+                <div style="color:#b2bec3; font-weight:bold; margin-bottom:15px; font-size:0.9rem;">SCORE: <span style="color:var(--primary); font-size:1.2rem;">${quizState.score}</span></div>
+                <div class="q-word">${quizState.target.kanji}</div>
+                <div class="q-kana">${quizState.target.kana}</div>
+                <div id="quiz-options"></div>
+            </div>
+        `;
+        container.appendChild(wrap);
+        
+        const optsDiv = wrap.querySelector('#quiz-options');
+        quizState.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span>${opt.meaning}</span> <span class="opt-en">${opt.english}</span>`;
+            btn.onclick = (e) => checkAnswer(opt, btn);
+            optsDiv.appendChild(btn);
+        });
+    }
+
+    function nextQuestion() {
+        const target = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+        const distractors = [];
+        while (distractors.length < 3) {
+            const r = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            if (r !== target && !distractors.includes(r)) distractors.push(r);
+        }
+        const options = [...distractors, target].sort(() => Math.random() - 0.5);
+        
+        const currentScore = quizState ? quizState.score : 0;
+        quizState = { target, options, answered: false, score: currentScore };
+        speak(target.kanji);
+    }
+
+    function checkAnswer(selected, btn) {
+        if (quizState.answered) return;
+        quizState.answered = true;
+
+        if (selected === quizState.target) {
+            btn.classList.add('correct');
+            quizState.score++;
+            speak("正解");
+            setTimeout(() => { nextQuestion(); render(); }, 1000);
+        } else {
+            btn.classList.add('wrong');
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => {
+                if (b.innerHTML.includes(quizState.target.meaning)) {
+                    b.classList.add('correct');
+                }
+            });
+            setTimeout(() => { nextQuestion(); render(); }, 2000);
+        }
+    }
+
+    function speak(text) {
+        if (!synth) return;
+        
+        // 尝试再次加载语音，因为有些手机可能第一次加载不出来
+        if (!jaVoice) loadVoices();
+
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        
+        // 关键修复：除了设置 lang，如果找到了日语语音包对象，显式赋值给 utterance.voice
+        u.lang = 'ja-JP';
+        if (jaVoice) {
+            u.voice = jaVoice;
+        }
+
+        // 调整语速和语调，确保在iOS上更自然
+        u.rate = 1;
+        u.pitch = 1;
+
+        synth.speak(u);
+    }
+
+    init();
+</script>
+
+</body>
+</html>
